@@ -1,13 +1,13 @@
 services:
   postgres:
-    image: postgres:13.2
+    build:
+      context: ./db
+      dockerfile: Dockerfile
     container_name: postgres
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: myBdd
-    volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
       - "5432:5432"
     deploy:
