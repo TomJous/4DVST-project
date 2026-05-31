@@ -65,22 +65,19 @@ CREATE TABLE IF NOT EXISTS observations (
 CREATE INDEX IF NOT EXISTS idx_obs_date  ON observations(aaaammjj);
 CREATE INDEX IF NOT EXISTS idx_obs_dept  ON observations(LEFT(num_poste, 2));
 
--- Vue principale utilisée par Metabase
+-- Vue nettoyée utilisée par Metabase
+-- Colonnes : uniquement celles nécessaires pour le storytelling crises/inondations
+-- Filtre qualité : qrr = 2 (donnée douteuse) exclue
 CREATE OR REPLACE VIEW v_observations AS
 SELECT
     num_poste,
     nom_usuel,
-    LEFT(num_poste, 2)                                      AS departement,
+    LEFT(num_poste, 2)                                           AS departement, -- les 2 premiers chiffres du code station = numéro de département
     lat,
     lon,
     alti,
-    TO_DATE(aaaammjj::text, 'YYYYMMDD')                     AS date_obs,
-    EXTRACT(YEAR FROM TO_DATE(aaaammjj::text, 'YYYYMMDD'))::integer AS annee,
-    rr,
-    qrr,
-    tn,
-    tx,
-    tm,
-    ffm,
-    fxi3s
-FROM observations;
+    TO_DATE(aaaammjj::text, 'YYYYMMDD')                          AS date_obs,   -- convertit l'entier YYYYMMDD en type DATE exploitable par Metabase
+    EXTRACT(YEAR FROM TO_DATE(aaaammjj::text, 'YYYYMMDD'))::int  AS annee,      -- année extraite pour grouper les crises par année dans les graphiques
+    COALESCE(rr, 0)                                              AS rr          -- remplace les précipitations NULL par 0 (absence de mesure = pas de pluie)
+FROM observations
+WHERE qrr IS NULL OR qrr <> 2;
