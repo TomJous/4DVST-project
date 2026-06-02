@@ -81,3 +81,51 @@ SELECT
     COALESCE(rr, 0)                                              AS rr          -- remplace les précipitations NULL par 0 (absence de mesure = pas de pluie)
 FROM observations
 WHERE qrr IS NULL OR qrr <> 2;
+
+-- ── Détection des crises (technique "gaps and islands") ──────────────────────
+-- Une crise = séquence de plus de 2 jours consécutifs avec rr >= 10 mm/jour
+-- Le seuil de 10mm/jour est réaliste (le PDF mentionnait 1m/jour = erreur)
+CREATE OR REPLACE VIEW v_crises AS
+WITH jours_pluie AS (
+    -- Numérotation globale par station vs numérotation dans les jours de pluie uniquement
+    -- La différence est constante pour chaque séquence consécutive (island_id)
+    SELECT
+        num_poste,
+        nom_usuel,
+        departement,
+        alti,
+        date_obs,
+        annee,
+        rr,
+        ROW_NUMBER() OVER (PARTITION BY num_poste ORDER BY date_obs)
+        - ROW_NUMBER() OVER (PARTITION BY num_poste ORDER BY date_obs) AS island_id
+    FROM v_observations
+    WHERE rr >= 20
+),
+crises_brutes AS (
+    SELECT
+        num_poste,
+        nom_usuel,
+        departement,
+        alti,
+        island_id,
+        MIN(date_obs)        AS debut,
+        MAX(date_obs)        AS fin,
+        COUNT(*)             AS duree_jours,
+        SUM(rr)              AS precipitations_totales_mm,
+        MIN(annee)           AS annee
+    FROM jours_pluie
+    GROUP BY num_poste, nom_usuel, departement, alti, island_id
+    HAVING COUNT(*) > 2  -- uniquement les crises de plus de 2 jours
+)
+SELECT
+    num_poste,
+    nom_usuel,
+    departement,
+    alti,
+    debut,
+    fin,
+    duree_jours,
+    precipitations_totales_mm,
+    annee
+FROM crises_brutes;
