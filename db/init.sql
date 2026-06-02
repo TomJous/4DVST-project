@@ -83,12 +83,11 @@ FROM observations
 WHERE qrr IS NULL OR qrr <> 2;
 
 -- ── Détection des crises (technique "gaps and islands") ──────────────────────
--- Une crise = séquence de plus de 2 jours consécutifs avec rr >= 10 mm/jour
--- Le seuil de 10mm/jour est réaliste (le PDF mentionnait 1m/jour = erreur)
-CREATE OR REPLACE VIEW v_crises AS
+-- Une crise = séquence de plus de 2 jours consécutifs avec rr >= 20 mm/jour
+-- Vue matérialisée : résultats pré-calculés sur disque → requêtes Metabase instantanées
+-- Pour rafraîchir après un nouvel import : REFRESH MATERIALIZED VIEW v_crises;
+CREATE MATERIALIZED VIEW IF NOT EXISTS v_crises AS
 WITH jours_pluie AS (
-    -- Numérotation globale par station vs numérotation dans les jours de pluie uniquement
-    -- La différence est constante pour chaque séquence consécutive (island_id)
     SELECT
         num_poste,
         nom_usuel,
@@ -97,8 +96,8 @@ WITH jours_pluie AS (
         date_obs,
         annee,
         rr,
-        ROW_NUMBER() OVER (PARTITION BY num_poste ORDER BY date_obs)
-        - ROW_NUMBER() OVER (PARTITION BY num_poste ORDER BY date_obs) AS island_id
+        -- island_id : date - rang = constante pour chaque séquence consécutive
+        date_obs - ROW_NUMBER() OVER (PARTITION BY num_poste ORDER BY date_obs)::integer AS island_id
     FROM v_observations
     WHERE rr >= 20
 ),
@@ -109,23 +108,18 @@ crises_brutes AS (
         departement,
         alti,
         island_id,
-        MIN(date_obs)        AS debut,
-        MAX(date_obs)        AS fin,
-        COUNT(*)             AS duree_jours,
-        SUM(rr)              AS precipitations_totales_mm,
-        MIN(annee)           AS annee
+        MIN(date_obs)     AS debut,
+        MAX(date_obs)     AS fin,
+        COUNT(*)          AS duree_jours,
+        SUM(rr)           AS precipitations_totales_mm,
+        MIN(annee)        AS annee
     FROM jours_pluie
     GROUP BY num_poste, nom_usuel, departement, alti, island_id
-    HAVING COUNT(*) > 2  -- uniquement les crises de plus de 2 jours
+    HAVING COUNT(*) >= 2
 )
-SELECT
-    num_poste,
-    nom_usuel,
-    departement,
-    alti,
-    debut,
-    fin,
-    duree_jours,
-    precipitations_totales_mm,
-    annee
+SELECT num_poste, nom_usuel, departement, alti,
+       debut, fin, duree_jours, precipitations_totales_mm, annee
 FROM crises_brutes;
+
+CREATE INDEX IF NOT EXISTS idx_crises_annee  ON v_crises(annee);
+CREATE INDEX IF NOT EXISTS idx_crises_dept   ON v_crises(departement);

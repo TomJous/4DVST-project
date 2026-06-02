@@ -24,7 +24,42 @@ load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 # ── Configuration ────────────────────────────────────────────────────────────
 
-DEPARTMENTS = ["13", "31", "33", "34", "38", "44", "59", "67", "75", "76"]
+DEPARTMENTS = [
+    # Haute altitude
+    "05",  # Hautes-Alpes       (~1500m moy — un des plus hauts de France)
+    "73",  # Savoie             (Alpes, Mont-Cenis)
+    "74",  # Haute-Savoie       (Alpes, Mont-Blanc)
+    "65",  # Hautes-Pyrénées    (Pyrénées)
+    "48",  # Lozère             (Massif Central, ~1000m moy)
+    "63",  # Puy-de-Dôme        (Massif Central, volcans)
+    # Basse altitude / littoral
+    "59",  # Nord               (~30m moy — un des plus bas)
+    "62",  # Pas-de-Calais      (littoral nord)
+    "29",  # Finistère          (Bretagne, très exposé)
+    "17",  # Charente-Maritime  (littoral atlantique)
+    "85",  # Vendée             (littoral bas)
+    # Crises météo fréquentes (épisodes cévenols / méditerranéens)
+    "30",  # Gard               (très flood-prone, Nîmes)
+    "11",  # Aude               (inondations 2018)
+    "34",  # Hérault            (Montpellier, épisodes intenses)
+    "66",  # Pyrénées-Orientales
+    "06",  # Alpes-Maritimes    (méditerranéen/alpin)
+    # Atlantique (crises longues, fréquentes)
+    "64",  # Pyrénées-Atlantiques (le plus arrosé de France)
+    "44",  # Loire-Atlantique
+    "33",  # Gironde
+    # Déjà représentatifs
+    "38",  # Isère              (Alpes du nord)
+    "31",  # Haute-Garonne      (piémont pyrénéen)
+    "13",  # Bouches-du-Rhône   (méditerranéen)
+    "76",  # Seine-Maritime     (Normandie, côtier)
+    # Grande population
+    "75",  # Paris              (~2.1M hab — capitale)
+    "69",  # Rhône              (~1.9M hab — Lyon)
+    "67",  # Bas-Rhin           (~1.1M hab — Strasbourg)
+    "77",  # Seine-et-Marne     (~1.4M hab — Île-de-France, inondations Seine)
+    "83",  # Var                (~1.1M hab — côte méditerranéenne)
+]
 
 BASE_URL = (
     "https://object.files.data.gouv.fr"
