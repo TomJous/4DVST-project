@@ -194,6 +194,14 @@ def main():
     print(f"\n{'=' * 45}")
     print(f"Done. Total rows imported : {grand_total:,}")
 
+    print("\nRefreshing materialized view v_crises...")
+    conn = psycopg2.connect(**DB)
+    with conn.cursor() as cur:
+        cur.execute("REFRESH MATERIALIZED VIEW v_crises;")
+    conn.commit()
+    conn.close()
+    print("v_crises refreshed.")
+
 
 if __name__ == "__main__":
     main()

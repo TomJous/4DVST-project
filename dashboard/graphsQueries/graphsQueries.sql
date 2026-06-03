@@ -29,7 +29,22 @@ ORDER BY g.annee;
 
 
 -- ────────────────────────────────────────────────────────────
--- CHART 2 — Carte choroplèthe : durée moyenne des crises par département
+-- CHART 2a — Carte choroplèthe : nombre de crises par département
+-- Type Metabase : Carte (Map) > Region map
+-- GeoJSON : https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson
+-- Region field : departement | Metric : nb_crises | Couleur : rouge
+-- ────────────────────────────────────────────────────────────
+
+SELECT
+    departement,
+    COUNT(*) AS nb_crises
+FROM v_crises
+GROUP BY departement
+ORDER BY nb_crises DESC;
+
+
+-- ────────────────────────────────────────────────────────────
+-- CHART 2b — Carte choroplèthe : durée moyenne des crises par département
 -- Type Metabase : Carte (Map) > Region map
 -- GeoJSON : https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson
 -- Region field : departement | Metric : duree_moyenne
@@ -67,14 +82,15 @@ LIMIT 10;
 -- X : altitude_moy | Y : nb_crises | Taille : duree_moyenne
 -- ────────────────────────────────────────────────────────────
 
--- Version finale : agrégation par département (10 points lisibles)
+-- Version finale : agrégation par département avec noms
 SELECT
-    departement,
+    r.nom                      AS departement,
     ROUND(AVG(alti))           AS altitude_moy,
     COUNT(*)                   AS nb_crises,
     ROUND(AVG(duree_jours), 1) AS duree_moyenne
-FROM v_crises
-GROUP BY departement
+FROM v_crises c
+JOIN ref_departements r ON c.departement = r.code
+GROUP BY r.nom
 ORDER BY altitude_moy;
 
 -- Version par tranches d'altitude (4 points, trop peu)

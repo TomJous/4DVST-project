@@ -10,6 +10,8 @@ services:
       POSTGRES_DB: myBdd
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     deploy:
       resources:
         limits:
@@ -26,8 +28,9 @@ services:
     depends_on:
       - postgres
     volumes:
-      - metabase_data:/metabase-data
+      - metabase_data:/metabase.db
 
 volumes:
   metabase_data:
+  postgres_data:
 

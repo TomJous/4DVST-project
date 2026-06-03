@@ -206,12 +206,33 @@ Une **crise météorologique** est définie comme une séquence d'**au moins 2 j
 
 Toutes les requêtes SQL du dashboard sont disponibles dans [`dashboard/graphsQueries/graphsQueries.sql`](dashboard/graphsQueries/graphsQueries.sql).
 
-Une fois le projet lancé et les données importées, chaque graphique peut être recréé dans Metabase :
+Une fois le projet lancé et les données importées, suivre les étapes suivantes.
+
+### Étape 1 — Configurer le GeoJSON (obligatoire pour les cartes)
+
+1. Aller dans **Admin** (icône ⚙️ en haut à droite)
+2. Cliquer sur **Maps** dans le menu gauche
+3. Cliquer sur **Add a map** et remplir :
+   - **Nom** : `Départements France`
+   - **URL** : `https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson`
+   - **Region field** : `code`
+4. Cliquer sur **Add map** puis **Save**
+
+### Étape 2 — Créer les questions SQL
+
+Pour chaque graphique :
 
 1. Aller dans **Nouveau → Requête SQL**
-2. Sélectionner la base `myBdd`
+2. Sélectionner la base `MetaDATA`
 3. Copier la requête correspondante depuis `graphsQueries.sql`
 4. Cliquer sur **Visualiser** et choisir le type de graphique indiqué dans les commentaires
+5. Sauvegarder la question dans la collection `Météo France - Crises`
+
+### Étape 3 — Assembler le dashboard
+
+1. Aller dans **Nouveau → Dashboard**
+2. Ajouter les 4 questions créées
+3. Ajouter un filtre **Année** : icône filtre → **Time** → **Year** → connecter à chaque question sur la colonne `annee`
 
 ### Visualisations du dashboard
 
