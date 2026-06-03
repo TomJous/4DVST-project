@@ -1,7 +1,7 @@
 -- ============================================================
 -- DASHBOARD — Météo France x Metabase
 -- Queries pour les 4 visualisations principales
--- Seuil crise : rr >= 20 mm/jour sur plus de 2 jours consécutifs
+-- Seuil crise : rr >= 20 mm/jour sur au moins 2 jours consécutifs
 -- ============================================================
 
 
